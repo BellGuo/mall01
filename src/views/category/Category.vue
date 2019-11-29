@@ -109,11 +109,11 @@
 import BScroll from "better-scroll";
 export default {
   name: "Category",
-  data() {
-    return {
-      scrollA: null
-    };
-  },
+  // data() {
+  //   return {
+  //     scroll: null
+  //   };
+  // },
   // 组件创建完后没有挂载模板
   // created() {
     
@@ -123,15 +123,24 @@ export default {
   //     scrollbar: true
   //   });
   // }
-  mounted(){
-    this.scrollA=new BScroll('.wrapper',{
-
-    })
-  }
+//   mounted(){
+//     this.scroll=new BScroll('.wrapper',{
+//       probeType:3,
+//       pullUpLoad:true
+//     })
+//     this.scroll.on('scroll',(position)=>{
+//       console.log(position);
+      
+//     })
+//     this.scroll.on('pullingUp',()=>{
+//       console.log('pullup');
+      
+//     })
+//   }
 };
 </script>
 
-<style>
+<style scoped>
 /* .content{
 height: 150px;
 background-color: red;
@@ -139,8 +148,8 @@ background-color: red;
 /* overflow-y: scroll; */
 /* }  */
 
-.wrapper {
-  height: 150px;
+/* .wrapper { */
+  /* height: 150px; */
   /* overflow: hidden; */
-}
+/* } */
 </style>
