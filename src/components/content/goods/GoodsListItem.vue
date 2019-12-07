@@ -1,6 +1,6 @@
 <template>
-  <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="">
+  <div class="goods-item" @click="itemClick">
+    <img :src="showImage" alt @load="imageLoad" />
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -11,29 +11,55 @@
 
 <script>
 export default {
-  name:'GoodsListItem',
-  props:{
-    goodsItem:{
-      type:Object,
-      default(){
-        return {}
+  name: "GoodsListItem",
+  props: {
+    goodsItem: {
+      type: Object,
+      default() {
+        return {};
       }
     }
+  },
+  methods: {
+    imageLoad() {
+      this.$EventBus.$emit("itemImageLoad");
+      // if (this.$route.path.indexOf("/home")) {
+      //   this.$EventBus.$emit("homeItemImageLoad");
+      // }else if(this.$route.path.indexOf('/detail')){
+      //   this.$EventBus.$emit("detailItemImgLoad")
+      // }
+    },
+    itemClick() {
+      // console.log("tiaozhuan");
+
+      this.$router.push("/detail/" + this.goodsItem.iid);
+      // this.$router.push({
+      //   path:'/detail',
+      //   query:{
+
+      //   }
+      // })
+    }
+  },
+  computed: {
+    showImage() {
+      return this.goodsItem.image || this.goodsItem.show.img;
+    }
   }
-}
+};
 </script>
 
 <style scoped>
-.goods-item{
+.goods-item {
   padding-bottom: 40px;
   position: relative;
   width: 45%;
 }
-.goods-item img{
+.goods-item img {
   width: 100%;
   border-radius: 5px;
 }
-.goods-info{
+.goods-info {
   font-size: 12px;
   position: absolute;
   bottom: 5px;
@@ -42,21 +68,21 @@ export default {
   overflow: hidden;
   text-align: center;
 }
-.goods-info p{
+.goods-info p {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-bottom: 3px;
 }
-.goods-info .price{
-  color:var(--color-high-text);
+.goods-info .price {
+  color: var(--color-high-text);
   margin-right: 20px;
 }
-.goods-info .collect{
+.goods-info .collect {
   position: relative;
 }
-.goods-info .collect::before{
-  content: '';
+.goods-info .collect::before {
+  content: "";
   position: absolute;
   left: -15px;
   top: -1px;
