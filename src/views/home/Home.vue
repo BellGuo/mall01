@@ -41,17 +41,16 @@ import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
 import GoodsListItem from "components/content/goods/GoodsListItem";
 import Scroll from "components/common/scroll/Scroll";
-import BackTop from "components/content/backTop/BackTop";
 
 // 方法
 import { getHomeMultidata, getHomeGoods } from "network/home";
 import { debounce } from "common/utils";
-import { itemListenerMixin } from "common/mixin";
+import { itemListenerMixin,backTopMixin } from "common/mixin";
 
 
 export default {
   name: "Home",
-  mixins:[itemListenerMixin],
+  mixins:[itemListenerMixin,backTopMixin],
   components: {
     HomeSwiper,
     RecommendView,
@@ -60,8 +59,7 @@ export default {
     TabControl,
     GoodsList,
     GoodsListItem,
-    Scroll,
-    BackTop
+    Scroll
   },
   data() {
     return {
@@ -73,7 +71,6 @@ export default {
         sell: { page: 0, list: [], positionY: 0 }
       },
       currentType: "pop",
-      isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
       saveY: 0
@@ -144,10 +141,7 @@ export default {
       this.$refs.tabControl1.currentIndex = index;
       this.$refs.tabControl2.currentIndex = index;
     },
-    backClick() {
-      // scroll第三个参数是时间，单位是毫秒
-      this.$refs.scroll.scrollTo(0, 0, 500);
-    },
+    
     contentScroll(position) {
       // 1.判断backtop是否显示
       this.isShowBackTop = -position.y > 1000;

@@ -1,16 +1,18 @@
 <template>
   <div id="detail">
-    <detail-nav-bar />
-
-    <scroll class="container" ref="scroll">
+    <detail-nav-bar @titleClick="titleClick" ref="nav" />
+    <scroll class="container" ref="scroll" :probe-type="3" @scroll="containerScorll">
       <detail-swiper :top-images="topImages" />
       <detail-base-info :goods="good" />
       <detail-shop-info :shop="shop" />
       <detail-goods-info :detail-info="detailInfo" @imgload="imageLoad" />
-      <detail-param-info :param-info="paramInfo" />
-      <detail-comment-info :comment-info="commentInfo"/>
-      <goods-list :goods="recommends"/>
+      <detail-param-info ref="param" :param-info="paramInfo" />
+      <detail-comment-info ref="comment" :comment-info="commentInfo" />
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
+    <detail-bottom-bar @addCart="addCart" />
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
+
   </div>
 </template>
 
@@ -22,18 +24,25 @@ import DetailShopInfo from "views/detail/childComponents/DetailShopInfo";
 import DetailGoodsInfo from "views/detail/childComponents/DetailGoodsInfo";
 import DetailParamInfo from "views/detail/childComponents/DetailParamInfo";
 import DetailCommentInfo from "views/detail/childComponents/DetailCommentInfo";
+import DetailBottomBar from "views/detail/childComponents/DetailBottomBar";
+
 
 import Scroll from "components/common/scroll/Scroll";
-import GoodsList from 'components/content/goods/GoodsList';
+import GoodsList from "components/content/goods/GoodsList";
 
-import { getDetail, GoodsInfo, Shop, GoodsParam,getRecommend } from "network/detail";
+import {
+  getDetail,
+  GoodsInfo,
+  Shop,
+  GoodsParam,
+  getRecommend
+} from "network/detail";
 import { debounce } from "common/utils";
-import { itemListenerMixin } from "common/mixin";
-
+import { itemListenerMixin,backTopMixin } from "common/mixin";
 
 export default {
   name: "Detail",
-  mixins:[itemListenerMixin],
+  mixins: [itemListenerMixin,backTopMixin],
   data() {
     return {
       iid: null,
@@ -43,8 +52,10 @@ export default {
       detailInfo: {},
       paramInfo: {},
       commentInfo: {},
-      recommends:[],
-
+      recommends: [],
+      titleTopYs: [],
+      getTitleTopY: null,
+      cIndex: 0
     };
   },
   components: {
@@ -56,11 +67,49 @@ export default {
     DetailGoodsInfo,
     DetailParamInfo,
     DetailCommentInfo,
-    GoodsList
+    GoodsList,
+    DetailBottomBar
   },
   methods: {
     imageLoad() {
-      this.$refs.scroll.refresh();
+      this.newRefresh();
+      this.getTitleTopY();
+      // console.log(this.$refs);
+    },
+    titleClick(index) {
+      console.log("titleIndex" + index);
+      this.$refs.scroll.scrollTo(0, -this.titleTopYs[index] + 44, 100);
+    },
+    containerScorll(position) {
+      // 获取y
+      const positionY = -position.y;
+
+      // 判断y
+      for (let i in this.titleTopYs) {
+        if (this.cIndex != i && positionY >= this.titleTopYs[i] - 44) {
+          this.cIndex = parseInt(i);
+          this.$refs.nav.currentIndex = this.cIndex;
+        }
+      }
+
+       // 1.判断backtop是否显示
+      this.isShowBackTop = -position.y > 1000;
+    },
+    addCart(){
+      // 获取购物车需要的信息
+      const product={}
+      console.log(this.topImages[0]);
+      
+      product.image= this.topImages[0];
+      product.title=this.good.title;
+      product.desc=this.good.desc;
+      product.price=this.good.realPrice;
+      product.iid=this.iid;
+
+      // 将商品添加到购物车里
+      // this.$store.cartList.push(product)
+      // this.$store.commit('addCart',product)
+      this.$store.dispatch('addCart',product)
     }
   },
   created() {
@@ -89,22 +138,37 @@ export default {
         data.itemParams.rule
       );
       // 取出评论信息
-      if(data.rate.cRate!==0){
-        this.commentInfo=data.rate.list[0]
+      if (data.rate.cRate !== 0) {
+        this.commentInfo = data.rate.list[0];
       }
     });
 
     // 请求推荐数据
-    getRecommend().then(res=>{
-      console.log(res);
-      this.recommends=res.data.list
-    })
+    getRecommend().then(res => {
+      // console.log(res);
+      this.recommends = res.data.list;
+    });
+    this.getTitleTopY = debounce(() => {
+      this.titleTopYs = [];
+      this.titleTopYs.push(0);
+      this.titleTopYs.push(this.$refs.param.$el.offsetTop);
+      this.titleTopYs.push(this.$refs.comment.$el.offsetTop);
+      this.titleTopYs.push(this.$refs.recommend.$el.offsetTop);
+      this.titleTopYs.push(Number.MAX_VALUE);
+      // console.log(this.titleTopYs);
+    });
+    // 若初次加载缓慢，会有错
+    // this.$nextTick(() => {
+    //   this.titleTopYs = [];
+    //   this.titleTopYs.push(0);
+    //   this.titleTopYs.push(this.$refs.params.$el.offsetTop);
+    //   this.titleTopYs.push(this.$refs.comment.$el.offsetTop);
+    //   this.titleTopYs.push(this.$refs.recommend.$el.offsetTop);
+    //   console.log(this.titleTopYs);
+    // });
   },
-  mounted(){
-  },
-  destroyed(){
-    this.$EventBus.$off('itemImgLoad',this.itemListener);
-
+  destroyed() {
+    this.$EventBus.$off("itemImgLoad", this.itemListener);
   }
 };
 </script>
@@ -117,7 +181,7 @@ export default {
 }
 .container {
   /* calc在chrome中使用需要添加前缀 */
-  height: -webkit-calc(100% - 44px);
+  height: -webkit-calc(100% - 44px - 49px);
   overflow: hidden;
 }
 </style>
