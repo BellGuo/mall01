@@ -1,11 +1,11 @@
 <template>
   <div class="bottom-bar">
     <div class="check-container">
-      <check-button class="check-button" />
+      <check-button :value="isSelectAll" class="check-button" @click.native="allBtnClick" />
       <span>全选</span>
     </div>
     <div class="total-price">合计:{{totalPrice}}</div>
-    <div class="calculate">去计算({{checkLength}})</div>
+    <div class="calculate" @click="calcClick">去计算({{checkLength}})</div>
   </div>
 </template>
 
@@ -25,7 +25,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['cartList']),
+    ...mapGetters(["cartList"]),
     totalPrice() {
       return (
         "￥" +
@@ -34,12 +34,34 @@ export default {
             return item.checked;
           })
           .reduce((preValue, item) => {
-            return (preValue*1+ item.price * item.count).toFixed(2);
+            return (preValue * 1 + item.price * item.count).toFixed(2);
           }, 0)
       );
     },
-    checkLength(){
-      return this.cartList.filter(item=>item.checked).length
+    checkLength() {
+      return this.cartList.filter(item => item.checked).length;
+    },
+    isSelectAll() {
+      // 会遍历所有元素，性能不高
+      // return (this.cartList.filter(item=>!item.checked).length)
+      if (this.cartList.length === 0) return false;
+      return !this.cartList.find(item => !item.checked);
+    }
+  },
+  methods: {
+    allBtnClick() {
+      if (this.isSelectAll) {
+        this.cartList.forEach(item => (item.checked = false));
+      } else {
+        this.cartList.forEach(item => (item.checked = true));
+      }
+      // 不可以这样做 每次遍历都会改变isselectall的值，导致混乱
+      // this.cartList.forEach(item => (item.checked = !this.isSelectAll));
+    },
+    calcClick() {
+      if (!this.isSelectAll) {
+        this.$toast.show("请选择购买的商品", 2000);
+      }
     }
   }
 };
@@ -66,11 +88,11 @@ export default {
   line-height: 20px;
   margin-right: 5px;
 }
-.total-price{
+.total-price {
   margin-left: 10px;
   flex: 1;
 }
-.calculate{
+.calculate {
   width: 100px;
   background-color: var(--color-tint);
   text-align: center;

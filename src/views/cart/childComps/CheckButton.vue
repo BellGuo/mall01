@@ -41,8 +41,12 @@ export default {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid #ccc;
+  border: 1px solid #ccc;
   cursor: pointer;
+  background-color: #fff;
+}
+.icon-selector img{
+  width: 15px;
 }
 .active{
   background-color: #ff8198;

@@ -10,9 +10,8 @@
       <detail-comment-info ref="comment" :comment-info="commentInfo" />
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
-    <detail-bottom-bar @addCart="addCart" />
+    <detail-bottom-bar @addCart="addToCart" />
     <back-top @click.native="backClick" v-show="isShowBackTop" />
-
   </div>
 </template>
 
@@ -26,9 +25,9 @@ import DetailParamInfo from "views/detail/childComponents/DetailParamInfo";
 import DetailCommentInfo from "views/detail/childComponents/DetailCommentInfo";
 import DetailBottomBar from "views/detail/childComponents/DetailBottomBar";
 
-
 import Scroll from "components/common/scroll/Scroll";
 import GoodsList from "components/content/goods/GoodsList";
+
 
 import {
   getDetail,
@@ -38,11 +37,12 @@ import {
   getRecommend
 } from "network/detail";
 import { debounce } from "common/utils";
-import { itemListenerMixin,backTopMixin } from "common/mixin";
+import { itemListenerMixin, backTopMixin } from "common/mixin";
+import { mapActions } from "vuex";
 
 export default {
   name: "Detail",
-  mixins: [itemListenerMixin,backTopMixin],
+  mixins: [itemListenerMixin, backTopMixin],
   data() {
     return {
       iid: null,
@@ -71,6 +71,7 @@ export default {
     DetailBottomBar
   },
   methods: {
+    ...mapActions(["addCart"]),
     imageLoad() {
       this.newRefresh();
       this.getTitleTopY();
@@ -92,24 +93,33 @@ export default {
         }
       }
 
-       // 1.判断backtop是否显示
+      // 1.判断backtop是否显示
       this.isShowBackTop = -position.y > 1000;
     },
-    addCart(){
+    addToCart() {
       // 获取购物车需要的信息
-      const product={}
+      const product = {};
       console.log(this.topImages[0]);
-      
-      product.image= this.topImages[0];
-      product.title=this.good.title;
-      product.desc=this.good.desc;
-      product.price=this.good.realPrice;
-      product.iid=this.iid;
+
+      product.image = this.topImages[0];
+      product.title = this.good.title;
+      product.desc = this.good.desc;
+      product.price = this.good.realPrice;
+      product.iid = this.iid;
 
       // 将商品添加到购物车里
       // this.$store.cartList.push(product)
       // this.$store.commit('addCart',product)
-      this.$store.dispatch('addCart',product)
+      // this.$store.dispatch('addCart',product).then(res=>{
+      //   console.log();
+
+      // })
+      this.addCart(product).then(res => {
+        console.log(res,this.$toast);
+        this.$toast.show(res)
+      });
+
+      // 添加到购物车成功
     }
   },
   created() {
