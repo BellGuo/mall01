@@ -1,11 +1,13 @@
 import { debounce } from "common/utils";
 import BackTop from "components/content/backTop/BackTop";
+import { POP, NEW, SELL } from 'common/const'
+
 
 export const itemListenerMixin = {
-  data(){
+  data() {
     return {
-      itemListener:null,
-      newReflash:null
+      itemListener: null,
+      newReflash: null
     }
   },
   mounted() {
@@ -16,18 +18,18 @@ export const itemListenerMixin = {
     };
     this.$EventBus.$on("itemImageLoad", this.itemListener);
     // console.log("我是混入我自豪");
-    
+
   }
 }
 
-export const backTopMixin={
-  components:{
+export const backTopMixin = {
+  components: {
     BackTop
   },
-  data(){
-    return{
+  data() {
+    return {
       isShowBackTop: false,
-      
+
     }
   },
   methods: {
@@ -37,4 +39,29 @@ export const backTopMixin={
     },
   },
 
+}
+
+export const tabControlMixin = {
+  data() {
+    return {
+      currentType: POP
+    }
+  },
+  methods: {
+    tabClick(index) {
+      switch (index) {
+        case 0:
+          this.currentType = POP
+          break
+        case 1:
+          this.currentType = NEW
+          break
+        case 2:
+          this.currentType = SELL
+          break
+      }
+      console.log(this.currentType);
+      
+    }
+  }
 }
